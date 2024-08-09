@@ -778,7 +778,7 @@ func (t *Terminal) readLine() (line string, err error) {
 		if lineOk {
 			if t.echo {
 				t.historyIndex = -1 // Resets the key up behavior/historyPending.
-				if t.AutoHistory {
+				if t.autoHistory {
 					t.history.Add(line)
 				}
 			}
