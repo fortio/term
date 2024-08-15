@@ -51,6 +51,11 @@ type Terminal struct {
 	// may be empty if the terminal doesn't support them.
 	Escape *EscapeCodes
 
+	// VisualLength can be overridden to provide a custom implementation
+	// for instance to handle wide characters. It should return the width
+	// of the rune array (and ignore ansi ESC sequences).
+	VisualLength func([]rune) int
+
 	// lock protects the terminal and the state in this object from
 	// concurrent processing of a key press and a Write() call.
 	lock sync.Mutex
@@ -115,6 +120,7 @@ func NewTerminal(c io.ReadWriter, prompt string) *Terminal {
 		historyIndex: -1,
 		history:      NewHistory(DefaultHistoryEntries),
 		autoHistory:  true,
+		VisualLength: visualLength,
 	}
 }
 
@@ -253,7 +259,7 @@ func (t *Terminal) moveCursorToPos(pos int) {
 		return
 	}
 
-	x := visualLength(t.prompt) + pos
+	x := t.VisualLength(t.prompt) + pos
 	y := x / t.termWidth
 	x = x % t.termWidth
 
